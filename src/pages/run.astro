@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+import { home } from '../data/home';
+---
+
+<Base
+	title="What I run · Karthik Surkanti"
+	description="The apps I build and run for myself on a small Kubernetes cluster at home, and how they reach the internet."
+>
+	<section class="run-hero" aria-labelledby="run-title">
+		<h1 id="run-title" class="run-hero__title">What I run</h1>
+		<p class="run-hero__lede">
+			A single-node k3s cluster at home runs the tools I use every day. Most of them are built to be operated by Claude or ChatGPT
+			through MCP, and every one of them is written down in a handbook so I can run it all by hand.
+		</p>
+	</section>
+
+	<section class="sec run" aria-labelledby="apps-title" data-reveal>
+		<h2 id="apps-title" class="h-sec">The apps</h2>
+		<ul class="run__list">
+			{
+				home.running.map((r) => (
+					<li id={r.id} class="run__item">
+						<h3 class="run__name">{r.name}</h3>
+						<p class="run__facts">
+							<span>{r.stack}</span>
+							<span>{r.reach}</span>
+						</p>
+						<p class="run__what">{r.what}</p>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<section class="sec how" aria-labelledby="how-title" data-reveal>
+		<h2 id="how-title" class="h-sec">How it fits together</h2>
+		<div class="how__grid">
+			<div>
+				<h3>Public, but not exposed</h3>
+				<p>
+					Public pages and MCP endpoints reach the cluster through a Cloudflare Tunnel, so no port is open on the home network.
+					Everything else is only reachable from my own devices over Tailscale.
+				</p>
+			</div>
+			<div>
+				<h3>One sign-in for the AI apps</h3>
+				<p>
+					Claude and ChatGPT connect to four MCP servers, all signed in through Identity, my own OAuth server. Each app gets only the
+					scopes I approve, and I can revoke any of them.
+				</p>
+			</div>
+			<div>
+				<h3>Releases I can read</h3>
+				<p>
+					Images are built and attested by GitHub Actions and deployed by digest. Stateless apps go through Orbit's catalog: a reviewed
+					spec, a policy that limits what any app may ask for, and a release from my laptop with a credential that expires in 30 minutes.
+				</p>
+			</div>
+			<div>
+				<h3>Written down</h3>
+				<p>
+					How each app is built, deployed, backed up and fixed lives in the
+					<a href="https://book.karthiksurkanti.in/">handbook</a>, with procedures I can follow without any AI help.
+				</p>
+			</div>
+		</div>
+	</section>
+</Base>

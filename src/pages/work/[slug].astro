@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+	const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+	return work.map((entry, i) => ({
+		params: { slug: entry.id },
+		props: { entry, next: work[(i + 1) % work.length] },
+	}));
+}
+
+const { entry, next } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+---
+
+<Base title={`${d.title}: ${d.kind} · Karthik Surkanti`} description={d.pitch}>
+	<!-- The waterline again: the naive number above the seam, the fixed one below. -->
+	<section class="case-hero" aria-labelledby="case-title">
+		<div class="case-hero__top">
+			<div class="case-hero__intro">
+				<h1 id="case-title" class="case-hero__title">{d.title}</h1>
+				<p class="case-hero__pitch">{d.pitch}</p>
+			</div>
+			<p class="case-hero__naive">
+				<span class="case-hero__num">{d.naive.value}</span>
+				<span class="case-hero__label">Naive: {d.naive.label}</span>
+			</p>
+		</div>
+		<div class="case-hero__bottom">
+			<p class="case-hero__fixed">
+				<span class="case-hero__num">{d.fixed.value}</span>
+				<span class="case-hero__label">Fixed: {d.fixed.label}</span>
+			</p>
+		</div>
+	</section>
+
+	<div class="case">
+		<dl class="case__meta" data-reveal>
+			<div><dt>Year</dt><dd>{d.year}</dd></div>
+			{d.inspiredBy && <div><dt>Rebuild of</dt><dd>{d.inspiredBy}</dd></div>}
+			<div><dt>Built with</dt><dd>{d.stack.join(', ')}</dd></div>
+			<div><dt>Code</dt><dd><a href={d.github}>{d.github.replace('https://', '')}</a></dd></div>
+		</dl>
+
+		{
+			d.media && (
+				<figure class="case__media" data-reveal>
+					<img src={d.media.src} alt={d.media.alt} width={d.media.width} height={d.media.height} loading="eager" decoding="async" />
+					<figcaption>{d.media.caption}</figcaption>
+				</figure>
+			)
+		}
+
+		<article class="prose">
+			<Content />
+		</article>
+
+		{
+			d.charts.length > 0 && (
+				<div class="case__charts">
+					{d.charts.map((c) => (
+						<figure data-reveal>
+							<img src={c.src} alt={c.alt} width={c.width} height={c.height} loading="lazy" decoding="async" />
+							<figcaption>{c.caption}</figcaption>
+						</figure>
+					))}
+				</div>
+			)
+		}
+
+		<p class="case__conditions" data-reveal>Measured on: {d.conditions}</p>
+
+		<p class="case__next" data-reveal>
+			<a href={`/work/${next.id}/`}>Next: {next.data.title}</a>
+		</p>
+	</div>
+</Base>

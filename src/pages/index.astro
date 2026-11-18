@@ -1,0 +1,228 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { home } from '../data/home';
+
+const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base
+	title="Karthik Surkanti: break it, then fix it"
+	description="Backend engineering case studies: production failures from Slack, Razorpay and Grab, rebuilt, broken on purpose, fixed and measured."
+	bareHeader
+>
+	<!-- Waterline hero: the seam cuts the second line. Above it, the naive world; below it, the fixed one. -->
+	<section class="hero" aria-labelledby="hero-title">
+		<div class="hero__top">
+			<a class="wordmark" href="/">Karthik Surkanti</a>
+			<nav class="hero__links" aria-label="Site">
+				<a href="/run/">What I run</a>
+				<a class="btn" href="#work">See the work</a>
+			</nav>
+		</div>
+
+		<h1 id="hero-title" class="hero__title">
+			<span class="hero__lines"><span class="hero__line"><span>Break it,</span></span><span class="hero__line"><span>then fix it.</span></span></span>
+		</h1>
+		<p class="hero__title hero__title--under" aria-hidden="true">
+			<span class="hero__lines"><span class="hero__line"><span>Break it,</span></span><span class="hero__line"><span>then fix it.</span></span></span>
+		</p>
+
+		<p class="hero__lede">
+			I rebuild production failures that Slack, Razorpay and Grab wrote about, measure them breaking, then measure the fix.
+		</p>
+	</section>
+
+	<!-- Work: a quiet ledger. The live thing: flip every result between the naive and the fixed version. -->
+	<section id="work" class="sec ledger" aria-labelledby="work-title" data-reveal>
+		<div class="ledger__col">
+			<div class="ledger__head">
+				<h2 id="work-title" class="h-sec">Five failures, measured</h2>
+				<div class="flip" role="group" aria-label="Show results for">
+					<button type="button" class="flip__btn" aria-pressed="true" data-show="naive">Naive</button>
+					<button type="button" class="flip__btn" aria-pressed="false" data-show="fixed">Fixed</button>
+				</div>
+			</div>
+
+			<ol class="ledger__rows" data-ledger data-show="naive">
+				{
+					work.map((w) => (
+						<li class="ledger__row" style={`--i:${w.data.order}`}>
+							<a class="ledger__link" href={`/work/${w.id}/`} data-preview={w.id}>
+								<span class="ledger__name">{w.data.title}</span>
+								<span class="ledger__kind">{w.data.kind}</span>
+								<span class="ledger__num">
+									<span class="ledger__val ledger__val--naive" title={w.data.naive.label}>
+										{w.data.naive.value}
+									</span>
+									<span class="ledger__val ledger__val--fixed" title={w.data.fixed.label}>
+										{w.data.fixed.value}
+									</span>
+								</span>
+								<span class="ledger__what">
+									<span class="ledger__what--naive">{w.data.naive.label}</span>
+									<span class="ledger__what--fixed">{w.data.fixed.label}</span>
+								</span>
+							</a>
+						</li>
+					))
+				}
+			</ol>
+		</div>
+
+		<div class="ledger__preview" aria-hidden="true">
+			{
+				work.map((w) =>
+					w.data.media ? (
+						<img
+							class="preview"
+							data-for={w.id}
+							src={w.data.media.poster ?? w.data.media.src}
+							alt=""
+							width={w.data.media.width}
+							height={w.data.media.height}
+							loading="lazy"
+							decoding="async"
+						/>
+					) : w.data.charts[0] ? (
+						<img class="preview" data-for={w.id} src={w.data.charts[0].src} alt="" width={w.data.charts[0].width} height={w.data.charts[0].height} loading="lazy" decoding="async" />
+					) : (
+						<p class="preview preview--text" data-for={w.id}>
+							{w.data.pitch}
+						</p>
+					),
+				)
+			}
+		</div>
+	</section>
+
+	<!-- Relief from the type: two of the projects' own recordings. -->
+	<section class="sec reel" aria-labelledby="reel-title" data-reveal>
+		<h2 id="reel-title" class="h-sec reel__title">Watch them break</h2>
+		<div class="reel__grid">
+			{
+				work
+					.filter((w) => w.data.media && w.data.media.src.match(/.(gif|webp)$/))
+					.map((w) => (
+						<figure class="reel__item">
+							<a href={`/work/${w.id}/`}>
+								<img src={w.data.media!.src} alt={w.data.media!.alt} width={w.data.media!.width} height={w.data.media!.height} loading="lazy" decoding="async" />
+							</a>
+							<figcaption>
+								<strong>{w.data.title}.</strong> {w.data.media!.caption}
+							</figcaption>
+						</figure>
+					))
+			}
+		</div>
+	</section>
+
+	<!-- About: side facts and one wide paragraph. -->
+	<section class="sec about" aria-labelledby="about-title" data-reveal>
+		<h2 id="about-title" class="h-sec about__title">How I work</h2>
+		<dl class="about__facts">
+			{
+				home.facts.map((f) => (
+					<div>
+						<dt>{f.label}</dt>
+						<dd>{f.value}</dd>
+					</div>
+				))
+			}
+		</dl>
+		<div class="about__text">
+			<p class="about__para">{home.statement}</p>
+			<p class="about__body">{home.about}</p>
+		</div>
+
+		<p class="about__word">Case studies</p>
+		<ul class="about__list">
+			{
+				work.map((w) => (
+					<li>
+						<a href={`/work/${w.id}/`}>{w.data.title}</a>
+						<span>{w.data.year}</span>
+					</li>
+				))
+			}
+		</ul>
+		<ul class="about__list">
+			{
+				home.elsewhere.map((e) => (
+					<li>
+						<a href={e.href}>{e.name}</a>
+						<span>{e.note}</span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<!-- What runs at home, one per poster line. -->
+	<section class="sec poster" aria-labelledby="run-title" data-reveal>
+		<h2 id="run-title" class="h-sec poster__title">Running at home</h2>
+		<ul class="poster__list">
+			{
+				home.running.map((r) => (
+					<li class="poster__item" style={`--i:${home.running.indexOf(r)}`}>
+						<a href={`/run/#${r.id}`}>
+							<span class="poster__name">{r.name}</span>
+							<span class="poster__detail">{r.short}</span>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<!-- Contact: display rows. -->
+	<section class="sec contact" aria-labelledby="contact-title" data-reveal>
+		<h2 id="contact-title" class="h-sec">Find me</h2>
+		<ul class="contact__rows">
+			{
+				home.contact.map((c) => (
+					<li>
+						<a class="contact__row" href={c.href}>
+							{c.text}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+
+	<script>
+		// Naive / Fixed: flip every result in the ledger.
+		const rows = document.querySelector<HTMLElement>('[data-ledger]');
+		const btns = [...document.querySelectorAll<HTMLButtonElement>('.flip__btn')];
+		btns.forEach((b) =>
+			b.addEventListener('click', () => {
+				const show = b.dataset.show!;
+				btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+				if (rows) rows.dataset.show = show;
+			}),
+		);
+
+		// Side preview: show the hovered or focused project's picture beside its row.
+		const previews = [...document.querySelectorAll<HTMLElement>('.preview')];
+		const pane = document.querySelector<HTMLElement>('.ledger__preview');
+		document.querySelectorAll<HTMLAnchorElement>('[data-preview]').forEach((a) => {
+			const on = () => {
+				previews.forEach((p) => p.classList.toggle('is-on', p.dataset.for === a.dataset.preview));
+				if (pane) pane.style.setProperty('--y', `${a.offsetTop}px`);
+				rows?.classList.add('is-hovering');
+				a.closest('li')?.classList.add('is-current');
+			};
+			const off = () => {
+				previews.forEach((p) => p.classList.remove('is-on'));
+				rows?.classList.remove('is-hovering');
+				a.closest('li')?.classList.remove('is-current');
+			};
+			a.addEventListener('mouseenter', on);
+			a.addEventListener('focus', on);
+			a.addEventListener('mouseleave', off);
+			a.addEventListener('blur', off);
+		});
+	</script>
+</Base>
